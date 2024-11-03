@@ -21,13 +21,12 @@ export class State {
 export class ColorPaletteGenerator {
   states = [
     new State([
-
       new Color("#ff433f"),
       new Color("#2f433f"),
       new Color("#fe0234"),
       new Color("#fee332"),
       new Color("#cf4333"),
-    
+  
     ]),
   ];
   currentIndex = 0;
@@ -56,7 +55,7 @@ export class ColorPaletteGenerator {
   lockToggling(id) {
     for (let i = 0; i < 5; i++) {
 
-      if (this.currentState.colors[i].id == id) {
+      if (this.currentState.colors[i].id===id) {
         this.currentState.colors[i].isLocked = !this.currentState.colors[i].isLocked;
       }
     }
