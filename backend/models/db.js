@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const connect = async () => {
   try {
-    await mongoose.connect('mongodb+srv://alaaalmedane:ZTEQNsSftAyAmEgr@cluster0.2d4jl.mongodb.net/color-palette?retryWrites=true&w=majority', {
+    await mongoose.connect('mongodb://localhost:27017/color-palette', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -11,6 +11,6 @@ const connect = async () => {
     console.error('Failed to connect to MongoDB:', error);
     throw error; // Re-throw the error to be handled by app.js
   }
-};
+}; 
 
 module.exports = { connect };
