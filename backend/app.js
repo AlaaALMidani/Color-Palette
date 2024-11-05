@@ -6,7 +6,7 @@ const multer = require("multer");
 const cors = require("cors");
 const db = require("./models/db");
 const mongoose = require("mongoose");
-const { create, findAll } = require("./models/colorPaletteModel");
+const { create, findAll } = require("./models/paletteModel");
 app.use(cors());
 
 // Middleware
