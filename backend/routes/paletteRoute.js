@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Color, State, ColorPalette, ColorPaletteLogic } = require('../services/colorsService');
+const { Color, State, ColorPalette, ColorPaletteLogic } = require('../services/paletteService');
 
 // let state = new ColorPaletteGenerator(2);
 

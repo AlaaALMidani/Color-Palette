@@ -1,18 +1,20 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const colorsRoutes = require("./routes/colors");
+const colorsRoutes = require("./routes/paletteRoute");
+const usersRoutes =require('./routes/usersRoute')
 const multer = require("multer");
 const cors = require("cors");
 const db = require("./models/db");
 const mongoose = require("mongoose");
-const { create, findAll } = require("./models/paletteModel");
 app.use(cors());
 
 // Middleware
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use("/colors", colorsRoutes);
-app.use("/colors", (req, res, next) => {
+app.use("/users", usersRoutes);
+app.use((req, res, next) => {
   console.log(req.method, req.url);
   next();
 });
@@ -20,13 +22,10 @@ const port = 3000;
 const host = "http://localhost:";
 
 db.connect()
-  .then(async() => {
-    app.listen(port, () => {
+  .then(async () => {
+    app.listen(port, () => {  
       console.log(`Server listening on ${host}${port}`);
     });
-
-    await create({ name: "al", email: "a@m.com", password: "we" })
-    console.log(await findAll())
 
   })
   .catch((err) => {

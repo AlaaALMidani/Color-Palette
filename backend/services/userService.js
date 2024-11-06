@@ -1,18 +1,8 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const fs = require("fs");
 const { UserRepo } = require("../models/userModel");
 
-// class User {
-//   constructor({ id, username, token, email }) {
-//     this.id = id;
-//     this.username = username;
-//     this.token = token;
-//     this.email = email;
-//   }
-// }
-
-class Auth {
+class UserServices {
   async hashPassword(password) {
     const saltRounds = 9; // Number of salt rounds (higher is more secure, but slower)
     const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -41,28 +31,18 @@ class Auth {
       return null;
     }
   }
-  validate(user) {
+  async validate(user) {
     const errors = {};
 
-    // firstName
+    // fullName
     if (
-      !user.firstName ||
-      typeof user.firstName !== "string" ||
-      user.firstName.trim().length < 2 ||
-      user.firstName.trim().length > 50
+      !user.fullName ||
+      typeof user.fullName !== "string" ||
+      user.fullName.trim().length < 2 ||
+      user.fullName.trim().length > 50
     ) {
-      errors.firstName =
+      errors.fullName =
         "First name is required, must be a string, and between 2 and 50 characters.";
-    }
-    // lastName
-    if (
-      !user.lastName ||
-      typeof user.lastName !== "string" ||
-      user.lastName.trim().length < 2 ||
-      user.lastName.trim().length > 50
-    ) {
-      errors.lastName =
-        "Last name is required, must be a string, and between 2 and 50 characters.";
     }
 
     //username
@@ -73,7 +53,8 @@ class Auth {
     } else if (!/^[a-zA-Z0-9._]+$/.test(user.username)) {
       errors.username =
         "Username can only contain alphanumeric characters, periods (.), and underscores (_).";
-    } else if (UserRepo.findByUsername(username)) {
+    } else if (await UserRepo.findByUsername(user.username)) {
+      console.log(UserRepo.findByUsername(user.username))
       errors.username = "Username is already exist";
     }
 
@@ -84,7 +65,7 @@ class Auth {
       !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(user.email)
     ) {
       errors.email = "Invalid email format.";
-    } else if (UserRepo.findByEmail(email)) {
+    } else if (await UserRepo.findByEmail(user.email)) {
       errors.email = "Email is already exist";
     }
 
@@ -97,16 +78,18 @@ class Auth {
 
     return errors;
   }
-
-
   async register(user) {
-    const validation = this.validate(user);
+    const validation = await this.validate(user);
 
     if (Object.keys(validation).length > 0) {
       return { ok: false, validation: validation };
     }
 
     const hashedPassword = await this.hashPassword(user.password);
+    console.log({
+      ...user,
+      password: hashedPassword,
+    })
     const newUser = await UserRepo.create({
       ...user,
       password: hashedPassword,
@@ -114,18 +97,24 @@ class Auth {
 
     const token = this.generateToken(newUser);
 
-    return { ok: true, user: { password, ...newUser, token } };
+    return { ok: true, user: { ...newUser._doc, token } };
   }
 
-  async login({ email, password }) {
-      const e = await UserRepo.findByEmail(email);
-      const passwordMatch = await this.comparePassword(password, e.password);
-      if (e.email === email && passwordMatch) {
-        console.log("matched");
-        return { ok: true, user: { password, ...e } };
-      }
-     
+  async login({ emailOrUsername, password }) {
+
+    let user = await UserRepo.findByEmail(emailOrUsername);
+
+    if (user && await this.comparePassword(password, user.password)) {
+      return { ok: true, user: { ...user._doc, token: this.generateToken(user) } };
+    }
+
+    user = await UserRepo.findByUsername(emailOrUsername)
+
+    if (user && await this.comparePassword(password, user.password)) {
+      return { ok: true, user: { ...user._doc, token: this.generateToken(user) } };
+    }
+   
     return { ok: false, message: "email or password isn't correct" };
   }
 }
-module.exports =new Auth();
+module.exports = new UserServices();

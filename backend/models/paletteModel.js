@@ -1,39 +1,38 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
+// Color Schema
+const colorSchema = new mongoose.Schema({
+    hex: { type: String, required: true },
+    rgb: { type: [Number], required: true }, // Array of RGB values
+    hsl: { type: [Number], required: true }, // Array of HSL values
+    isLocked: { type: Boolean, default: false }
+});
 
-// const userSchema = new mongoose.Schema({
-//   name: { type: String, required: true },
-//   email: { type: String, required: true, unique: true },
-//   password: { type: String, required: true }
-// });
+// State Schema
+const stateSchema = new mongoose.Schema({
+    colors: { type: [colorSchema], required: true }, // Array of Color
+    likes: { type: Number, default: 0 },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true } // Assuming you have a User model
+});
 
-// const User = mongoose.model('Users', userSchema);
+// ColorPalette Schema
+const colorPaletteSchema = new mongoose.Schema({
+    states: { type: [stateSchema], required: true }, // Array of State
+    currentIndex: { type: Number, default: 0 },
+    currentState: { type: stateSchema, required: true } // Reference to the current state
+});
 
-// const create = async (userData) => {
-//   const newUser = new User(userData);
-//   return await newUser.save();
-// };
+// ColorPalette Model
+const ColorPalette = mongoose.model('ColorPalette', colorPaletteSchema);
 
-// const findAll = async () => {
-//   return await User.find();
-// };
+class ColorPaletteRepo {
+   static create = async (palette) => {
+        const newPalette = new ColorPalette(palette)
+        return await newPalette.save()
+    }
 
-// const findById = async (id) => {
-//   return await User.findById(id);
-// };
-
-// const update = async (id, userData) => {
-//   return await User.findByIdAndUpdate(id, userData, { new: true }); //new:true returns the updated doc
-// };
-
-// const deleteOne = async (id) => {
-//   return await User.findByIdAndDelete(id);
-// };
-
-// module.exports = {
-//   create,
-//   findAll,
-//   findById,
-//   update,
-//   delete: deleteOne,
-// };
+    static update = async (id,palette) => {
+        const newPalette = new ColorPalette(palette)
+        return await newPalette.save()
+    }
+}

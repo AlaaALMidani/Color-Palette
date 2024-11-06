@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const connect = async () => {
   try {
-    await mongoose.connect('mongodb+srv://alaaalmedane:a1HdKaiPT566ySIY@cluster0.2d4jl.mongodb.net/color-palette', {
+    await mongoose.connect('mongodb://localhost:27017/color-palette', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
