@@ -1,15 +1,33 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { Color, State, ColorPalette, ColorPaletteLogic } = require('../services/paletteService');
+const {
+  Color,
+  State,
+  ColorPalette,
+  ColorPaletteService,
+} = require("../services/paletteService");
 
-// let state = new ColorPaletteGenerator(2);
+function checkToken(req, res, next) {
+  if (!req.headers.authorization) {
+    return res.status(401).json({ error: "No authorization header found" });
+  }
+  const [scheme, token] = req.headers.authorization.split(" ");
+  if (scheme !== "Bearer") {
+    return res.status(401).json({ error: "Invalid authorization scheme" });
+  }
+  const [header, payload, signature] = token.split(".");
+  const decodedPayload = JSON.parse(atob(payload));
+  req.tokenPayload = decodedPayload;
+  next();
+}
+                
+router.get("/", checkToken, (req, res) => {
+  res.send()
+  res.send(req.tokenPayload);
+});
+router.post("/generateNewPalette", (req, res) => {
+  state.generatePallette();
+  res.send(state);
+});
 
-// router.get('/', (req, res) => {
-//     res.send(new ColorPaletteGenerator(2))
-// })
-// router.get('/generateNewPalette', (req, res) => {
-//     state.generatePallette()
-//     res.send(state)
-// })
-
-module.exports = router
+module.exports = router;

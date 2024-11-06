@@ -1,16 +1,17 @@
+const { ColorPaletteRepo } = require("../models/paletteModel");
+
 class Color {
   static id = 1;
   constructor(hex, isLocked) {
     this.id = Color.id;
     this.hex = hex;
-    let transform = hexToRgbHsl(hex)
+    let transform = hexToRgbHsl(hex);
     this.rgb = transform.rgb;
-    this.hsl = transform.hsl
+    this.hsl = transform.hsl;
 
     if (isLocked !== undefined) {
       this.isLocked = false;
-    }
-    else {
+    } else {
       this.isLocked = isLocked;
     }
     Color.id += 1;
@@ -23,9 +24,10 @@ class State {
   constructor(colors, userId) {
     this.colors = colors;
     this.id = State.id;
-    State.id++;
     this.likes = 0;
     this.userID = userId;
+    this.isPubliished = false;
+    State.id++;
   }
 }
 
@@ -43,18 +45,20 @@ class ColorPalette {
         userID
       ),
     ];
+
+    this.userID = userID;
     this.currentIndex = 0;
     this.currentState = this.states[0];
   }
 }
 
-class ColorPaletteLogic {
-
-  static getUserState(userId) {
-
+class ColorPaletteService {
+  static async addInitialState(userID) {
+    return await ColorPaletteRepo.create(new ColorPalette(userID));
   }
-  static generatePallette(state) {
+  static async generatePallette(state) {
     let tempState = [];
+
     for (let i = 0; i < 5; i++) {
       if (this.currentState.colors[i].isLocked) {
         tempState.push(this.currentState.colors[i]);
@@ -62,34 +66,34 @@ class ColorPaletteLogic {
         tempState.push(new Color(randomC()));
       }
     }
+
     state.states.push(new State(tempState));
     state.setIndex(this.currentIndex + 1);
-    return state;
+ 
   }
-
-  static doo(state) {
+  static async doo(state) {
     if (state.currentIndex === state.states.length - 1) return;
     state.setIndex(state.currentIndex + 1);
-    return state;
+    return await ColorPaletteRepo.update(state.userID,state) ;
   }
-  static undo(state) {
+  static async undo(state) {
     if (state.currentIndex === 0) return;
     state.setIndex(state.currentIndex - 1);
-    return state;
+    return await ColorPaletteRepo.update(state.userID,state) ;
   }
-  static lockToggling(state, id) {
+  static async lockToggling(state, id) {
     for (let i = 0; i < 5; i++) {
       if (state.currentState.colors[i].id == id) {
         state.currentState.colors[i].isLocked =
           !state.currentState.colors[i].isLocked;
       }
     }
-    return state;
+    return await ColorPaletteRepo.update(state.userID,state) ;
   }
-  static setIndex(state, index) {
+  static async setIndex(state, index) {
     state.currentIndex = index;
     state.currentState = this.states[index];
-    return state;
+    return await ColorPaletteRepo.update(state.userID,state) ;
   }
 }
 
@@ -103,7 +107,7 @@ function randomC() {
 }
 function hexToRgbHsl(hex) {
   // Remove the hash at the start if it's there
-  hex = hex.replace(/^#/, '');
+  hex = hex.replace(/^#/, "");
 
   // Convert the hex to RGB
   const r = parseInt(hex.slice(0, 2), 16);
@@ -115,7 +119,9 @@ function hexToRgbHsl(hex) {
   const min = Math.min(r, g, b);
   const delta = max - min;
 
-  let h, s, l = (max + min) / 2 / 255;
+  let h,
+    s,
+    l = (max + min) / 2 / 255;
 
   if (delta === 0) {
     h = 0;
@@ -140,13 +146,10 @@ function hexToRgbHsl(hex) {
   // Return results
   return {
     rgb: [r, g, b],
-    hsl: [h, s * 100, l * 100]
+    hsl: [h, s * 100, l * 100],
   };
 }
 
 module.exports = {
-  Color,
-  State,
-  ColorPalette,
-  ColorPaletteLogic,
+  ColorPaletteService,
 };

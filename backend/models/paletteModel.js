@@ -1,38 +1,46 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Color Schema
 const colorSchema = new mongoose.Schema({
-    hex: { type: String, required: true },
-    rgb: { type: [Number], required: true }, // Array of RGB values
-    hsl: { type: [Number], required: true }, // Array of HSL values
-    isLocked: { type: Boolean, default: false }
+  hex: { type: String, required: true },
+  rgb: { type: [Number], required: true }, // Array of RGB values
+  hsl: { type: [Number], required: true }, // Array of HSL values
+  isLocked: { type: Boolean, default: false },
 });
 
 // State Schema
 const stateSchema = new mongoose.Schema({
-    colors: { type: [colorSchema], required: true }, // Array of Color
-    likes: { type: Number, default: 0 },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true } // Assuming you have a User model
+  colors: { type: [colorSchema], required: true }, // Array of Color
+  likes: { type: Number, default: 0 },
+  isPublished: { type: Boolean, default: false },
+  userID: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Assuming you have a User model
 });
 
 // ColorPalette Schema
 const colorPaletteSchema = new mongoose.Schema({
-    states: { type: [stateSchema], required: true }, // Array of State
-    currentIndex: { type: Number, default: 0 },
-    currentState: { type: stateSchema, required: true } // Reference to the current state
+  states: { type: [stateSchema], required: true }, // Array of State
+  userID: { type: String },
+  currentIndex: { type: Number, default: 0 },
+  currentState: { type: stateSchema, required: true }, // Reference to the current state
 });
 
 // ColorPalette Model
-const ColorPalette = mongoose.model('ColorPalette', colorPaletteSchema);
+const ColorPalette = mongoose.model("ColorPalette", colorPaletteSchema);
 
 class ColorPaletteRepo {
-   static create = async (palette) => {
-        const newPalette = new ColorPalette(palette)
-        return await newPalette.save()
-    }
+  static create = async (palette) => {
+    const newPalette = new ColorPalette(palette);
+    return await newPalette.save();
+  };
 
-    static update = async (id,palette) => {
-        const newPalette = new ColorPalette(palette)
-        return await newPalette.save()
-    }
+  static update = async (fieldToCheck, newValue) => {
+    const newPalette = ColorPalette.findOneAndUpdate(
+      { [fieldToCheck]: valueToCheck },
+      { $set: { newValue} },
+      { new: true }
+    );
+    return await newPalette.save();
+  };
 }
+
+module.exports = { ColorPaletteRepo };

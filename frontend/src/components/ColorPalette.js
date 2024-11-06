@@ -12,7 +12,7 @@ export const ColorPalette = () => {
     setState({ logic: state.logic });
   };
   const handleKeyDown = (event) => {
-    if (event.key == " ") {
+    if (event.key === " ") {
       event.preventDefault();
       state.logic.generatePallette();
       setState({ logic: state.logic });

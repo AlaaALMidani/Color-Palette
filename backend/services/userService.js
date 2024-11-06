@@ -1,7 +1,8 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { UserRepo } = require("../models/userModel");
-
+const {ColorPaletteService} = require('../services/paletteService');  
+    
 class UserServices {
   async hashPassword(password) {
     const saltRounds = 9; // Number of salt rounds (higher is more secure, but slower)
@@ -15,7 +16,7 @@ class UserServices {
   secretKey = "sdwe";
   generateToken(user) {
     const payload = {
-      userId: user.id,
+      userId: user._id,
       username: user.username,
     };
 
@@ -86,20 +87,16 @@ class UserServices {
     }
 
     const hashedPassword = await this.hashPassword(user.password);
-    console.log({
-      ...user,
-      password: hashedPassword,
-    })
+    
     const newUser = await UserRepo.create({
       ...user,
       password: hashedPassword,
     });
 
     const token = this.generateToken(newUser);
-
+    await ColorPaletteService.addInitialState(newUser._id) ;
     return { ok: true, user: { ...newUser._doc, token } };
   }
-
   async login({ emailOrUsername, password }) {
 
     let user = await UserRepo.findByEmail(emailOrUsername);
