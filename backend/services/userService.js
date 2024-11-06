@@ -16,7 +16,7 @@ class UserServices {
   secretKey = "sdwe";
   generateToken(user) {
     const payload = {
-      userId: user._id,
+      userID: user._id,
       username: user.username,
     };
 

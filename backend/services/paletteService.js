@@ -56,48 +56,57 @@ class ColorPaletteService {
   static async addInitialState(userID) {
     return await ColorPaletteRepo.create(new ColorPalette(userID));
   }
-  static async generatePallette(state) {
-    let tempState = [];
 
+  static async generatePallette(id) {
+
+    const state = await ColorPaletteRepo.find(id)
+
+    let tempState = [];
     for (let i = 0; i < 5; i++) {
-      if (this.currentState.colors[i].isLocked) {
-        tempState.push(this.currentState.colors[i]);
+      if (state.currentState.colors[i].isLocked) {
+        tempState.push(state.currentState.colors[i]);
       } else {
-        tempState.push(new Color(randomC()));
+        tempState.push(new Color(randomColor()));
       }
     }
-
     state.states.push(new State(tempState));
-    state.setIndex(this.currentIndex + 1);
- 
+    this.setIndex(state, state.currentIndex + 1);
+    await ColorPaletteRepo.update(state.userID, state);
+    return state
   }
-  static async doo(state) {
+  static async doo() {
+    const state = await ColorPaletteRepo.find(id)
     if (state.currentIndex === state.states.length - 1) return;
     state.setIndex(state.currentIndex + 1);
-    return await ColorPaletteRepo.update(state.userID,state) ;
+    return await ColorPaletteRepo.update(state.userID, state);
   }
-  static async undo(state) {
+  static async undo() {
+    const state = await ColorPaletteRepo.find(id)
     if (state.currentIndex === 0) return;
     state.setIndex(state.currentIndex - 1);
-    return await ColorPaletteRepo.update(state.userID,state) ;
+    return await ColorPaletteRepo.update(state.userID, state);
   }
-  static async lockToggling(state, id) {
+  static async lockToggling(userID, id) {
+    const state = await ColorPaletteRepo.find(userID)
     for (let i = 0; i < 5; i++) {
       if (state.currentState.colors[i].id == id) {
         state.currentState.colors[i].isLocked =
           !state.currentState.colors[i].isLocked;
       }
     }
-    return await ColorPaletteRepo.update(state.userID,state) ;
+    return await ColorPaletteRepo.update(state.userID, state);
   }
-  static async setIndex(state, index) {
+
+
+  static setIndex(state, index) {
+
     state.currentIndex = index;
-    state.currentState = this.states[index];
-    return await ColorPaletteRepo.update(state.userID,state) ;
+    state.currentState = state.states[index];
+    return state;
   }
 }
 
-function randomC() {
+function randomColor() {
   return (
     "#" +
     Math.floor(Math.random() * 16777215)

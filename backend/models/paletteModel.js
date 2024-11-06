@@ -32,14 +32,14 @@ class ColorPaletteRepo {
     const newPalette = new ColorPalette(palette);
     return await newPalette.save();
   };
-
-  static update = async (fieldToCheck, newValue) => {
-    const newPalette = ColorPalette.findOneAndUpdate(
-      { [fieldToCheck]: valueToCheck },
-      { $set: { newValue} },
-      { new: true }
+  static find = async (userID) => {
+    return await ColorPalette.findOne({ userID });
+  }
+  static update = async (userID, newValue) => {
+    return await ColorPalette.updateOne(
+      { userID: userID },
+      { $set: newValue },
     );
-    return await newPalette.save();
   };
 }
 
