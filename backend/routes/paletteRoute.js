@@ -1,11 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const {
-    Color,
-    State,
-    ColorPalette,
-    ColorPaletteService,
-} = require("../services/paletteService");
+const { ColorPaletteService } = require("../services/paletteService");
 
 function checkToken(req, res, next) {
     if (!req.headers.authorization) {
@@ -20,12 +15,24 @@ function checkToken(req, res, next) {
     req.tokenPayload = decodedPayload;
     next();
 }
-
-router.get("/", checkToken, (req, res) => {
+router.use(checkToken)
+router.get("/", (req, res) => {
     res.send(req.tokenPayload);
 });
-router.get("/generateNewPalette",checkToken, async (req, res) => {
-    res.send(await ColorPaletteService.generatePallette(req.tokenPayload.userID));
+router.get("/generateNewPalette", async (req, res) => {
+    res.send(await ColorPaletteService.generatePalette(req.tokenPayload.userID));
 });
- 
+router.get('/back', async (req, res) => {
+    res.send(await ColorPaletteService.undo(req.tokenPayload.userID));
+})
+router.get('/forward', async (req, res) => {
+    res.send(await ColorPaletteService.doo(req.tokenPayload.userID));
+})
+router.get('/lockToggling', async (req, res) => {
+
+    res.send(await ColorPaletteService.lockToggling(req.tokenPayload.userID, req.query.id));
+})
+router.get('/reset', async (req, res) => {
+    res.send(await ColorPaletteService.reset(req.tokenPayload.userID))
+})
 module.exports = router;
