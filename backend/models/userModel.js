@@ -1,12 +1,22 @@
 const mongoose = require("mongoose");
 
+
+
+
+
 const userSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  username: { type: String, required: true, unique:true },
+  phoneNumber: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  location: { type: String, },
+  Active: { type: Boolean },
   token: { type: String },
+  roleID: { type: Number, required: true }
 });
+
+
+
+
 
 const User = mongoose.model("Users", userSchema);
 
@@ -20,7 +30,10 @@ class UserRepo {
   };
   static findById = async (id) => {
     return await User.findById(id);
-  };
+    };
+    static findByRole = async (role) => {
+      return await User.findOne({ role })
+    }
   static findByEmail = async (email) => {
     return await User.findOne({ email });
   };
@@ -38,3 +51,4 @@ class UserRepo {
 module.exports = {
   UserRepo,
 };
+///add user
